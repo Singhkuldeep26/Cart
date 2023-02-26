@@ -20,6 +20,9 @@ class App extends React.Component {
     //query for fecthing the product which we want as per our query
     .collection("products") //getting all the products
     // .where('price','>=', 999) // after fetching db we should write query
+    // .where('price','==',99)
+    // .where('title','==','Mouse')
+    .orderBy('price','desc')
     .onSnapshot(snapshot => {
       const products = snapshot.docs.map(doc => {
         const data = doc.data();
@@ -39,10 +42,22 @@ class App extends React.Component {
       const {products}=this.state;
       const index=products.indexOf(product);
 
-      products[index].qty +=1;
-      this.setState({
-          products
-      })
+      // products[index].qty +=1;
+      // this.setState({
+      //     products
+      // })
+
+      const docRef=firestore.collection('products').doc(products[index].id);
+      docRef
+        .update({
+          qty:products[index].qty+1
+        })
+        .then(()=>{
+          console.log('Update successfully')
+        })
+        .catch((error)=>{
+          console.log('Error :',error);
+        })
   }
   handleDecreaseQuantity=(product) => {
       console.log('Heyy please decrease the qty of',product);
@@ -53,18 +68,40 @@ class App extends React.Component {
           return;
       }
 
-      products[index].qty -=1;
-      this.setState({
-          products
-      })
+      // products[index].qty -=1;
+      // this.setState({
+      //     products
+      // })
+
+      const docRef=firestore.collection('products').doc(products[index].id);
+      docRef
+        .update({
+          qty:products[index].qty-1
+        })
+        .then(()=>{
+          console.log('Update successfully')
+        })
+        .catch((error)=>{
+          console.log('Error :',error);
+        })
   }
   handleDeleteProduct = (id) =>{
       const{products}=this.state;
-      const items=products.filter((item) => item.id !==id); //[{}]
+      // const items=products.filter((item) => item.id !==id); //[{}]
 
-      this.setState({
-          products:items
-      })
+      // this.setState({
+      //     products:items
+      // })
+
+      const docRef=firestore.collection('products').doc(id);
+      docRef
+        .delete()
+        .then(()=>{
+          console.log('Deleted successfully')
+        })
+        .catch((error)=>{
+          console.log('Error :',error);
+        })
   }
   getCartCount = () => {
     const { products } = this.state;
@@ -107,7 +144,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <Navbar count={this.getCartCount()} />
-        <button onClick={this.addProduct} style={{padding:20,fontSize:20}}>Add a product</button>
+        {/* <button onClick={this.addProduct} style={{padding:20,fontSize:20}}>Add a product</button> */}
         <Cart
         products={products}
         onIncreaseQuantity={this.handleIncreaseQuantity}
